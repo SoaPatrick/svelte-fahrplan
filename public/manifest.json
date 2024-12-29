@@ -1,0 +1,7 @@
+{
+    "name": "Fahrplan",
+    "short_name": "Fahrplan",
+    "background_color": "#090812",
+    "display": "standalone",
+    "orientation": "portrait"
+}
