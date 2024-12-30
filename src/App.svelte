@@ -1,8 +1,8 @@
 <script>
   import { onMount, onDestroy } from "svelte";
-  import Locate from "./lib/Locate.svelte";
+  import LocateIcon from "./lib/LocateIcon.svelte";
+  import LoadingIcon from "./lib/LoadingIcon.svelte";
   import Timetable from "./lib/Timetable.svelte";
-  import Loading from "./lib/Loading.svelte";
 
   let timetables = [];
   let stationName = "";
@@ -11,9 +11,8 @@
   let limit = 6;
   let isLoadingStations = false;
   let isLoadingTimetables = false;
-  let reloadInterval = 30000;
+  let reloadInterval = 60000;
   let geolocationSuccessful = false;
-
 
   let stations = [];
   let selectedStation = "";
@@ -98,11 +97,12 @@
       }
 
       stationName = data.station.name;
-      timetables = data.stationboard.map((entry) => {
+
+      const rawTimetables = data.stationboard.map((entry) => {
         const departureTime = new Date(entry.stop.departure);
         const delay = entry.stop.delay || 0;
 
-        departureTime.setSeconds(departureTime.getSeconds() + delay);
+        //departureTime.setSeconds(departureTime.getSeconds() + delay);
 
         const now = new Date();
         const minutesToDeparture = Math.max(
@@ -118,8 +118,20 @@
           ...entry,
           minutesToDeparture,
           stationOnly,
+          delay,
         };
       });
+
+
+      timetables = rawTimetables.reduce((groups, timetable) => {
+        const key = timetable.stationOnly;
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+        groups[key].push(timetable);
+        return groups;
+      }, {});
+
     } catch (err) {
       error = err.message;
     } finally {
@@ -165,9 +177,9 @@
             disabled={isLoadingStations}
     >
       {#if isLoadingStations}
-        <Loading />
+        <LoadingIcon />
       {:else}
-        <Locate />
+        <LocateIcon />
       {/if}
     </button>
   </div>
@@ -184,8 +196,11 @@
     <p>Kaini Informazioone verfiegbaar.</p>
   {:else}
     <div>
-      {#each timetables as timetable}
-        <Timetable timetable={timetable}/>
+      {#each Object.entries(timetables) as [station, entries]}
+        <h3>{station}</h3>
+        {#each entries as entry}
+          <Timetable timetable={entry} />
+        {/each}
       {/each}
     </div>
   {/if}
@@ -194,17 +209,30 @@
 <style>
 
   h1 {
+    margin-top: 1rem;
     font-size: 3.5rem;
+  }
+
+  h3 {
+    font-family: Handjet, serif;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(255,255,255,.5);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,.25);
   }
 
   main {
     text-align: left;
-    width: 350px;
+    width: 340px;
     font-size: 1.5rem;
+    margin-bottom: 2rem;
   }
 
   .select-box {
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
     display: flex;
     gap: 1rem;
   }
@@ -245,6 +273,6 @@
   }
 
   .error {
-    color: #ff3d3d;
+    color: var(--clr-error);
   }
 </style>

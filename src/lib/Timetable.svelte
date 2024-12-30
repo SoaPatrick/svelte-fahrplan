@@ -1,17 +1,22 @@
 <script>
-    import Transit from "./Transit.svelte";
+    import TransitIcon from "./TransitIcon.svelte";
     let { timetable } = $props();
 </script>
 <div class="line">
-    <div class="number">{timetable.number}</div>
+    <div class="number">Linie : {timetable.number}</div>
     <div class="destination">{timetable.stationOnly}</div>
+    <div class="delay">
+        {#if timetable.delay !== 0}
+            + {timetable.delay} '
+        {/if}
+    </div>
     <div class="departure-time">
         {#if timetable.minutesToDeparture === 0}
             <div class="train-icon">
-                <Transit/>
+                <TransitIcon/>
             </div>
         {:else}
-            {timetable.minutesToDeparture}'
+            {timetable.minutesToDeparture} '
         {/if}
     </div>
 </div>
@@ -26,14 +31,23 @@
         color: var(--clr-brand);
     }
 
+    .destination {
+        display: none;
+    }
+
     .number {
-        width: 3ch;
         text-align: right;
+    }
+
+    .delay {
+        flex: 1;
+        text-align: right;
+        color: var(--clr-error);
     }
 
     .departure-time {
         text-align: right;
-        flex: 1;
+        width: 4ch;
     }
 
     .train-icon {

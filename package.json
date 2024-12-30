@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && rsync -avL dist/ $SP_REMOTE_USER@$SP_REMOTE_HOST:www/faarblaan.soapatrick.com --delete"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
